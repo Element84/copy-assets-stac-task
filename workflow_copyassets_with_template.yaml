@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: copy-assets-workflow
+spec:
+  entrypoint: copy-assets
+  serviceAccountName: argo # set this so the proper permissions are assigned
+  arguments:
+    parameters:
+    - name: input
+      value: https://payloadtest.s3.us-west-2.amazonaws.com/payload_workflow.json
+
+  templates:
+  - name: copy-assets
+    steps:
+      - - name: copy-assets
+          templateRef:
+            name: copy-assets-template
+            template: copy-task

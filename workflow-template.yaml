@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: copy-assets-template
+spec:
+  serviceAccountName: argo-workflow
+  templates:
+    - name: copy-task
+      container:
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret-credentials
+              key: access_key_id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret-credentials
+              key: secret_access_key
+        image: quay.io/element84/copy-assets-stac-task:latest
+        imagePullPolicy: IfNotPresent
+        command: ["python3", "./task.py", "run"]
+        args: ["{{workflow.parameters.input}}"]
