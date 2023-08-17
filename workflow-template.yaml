@@ -3,7 +3,7 @@ kind: WorkflowTemplate
 metadata:
   name: copy-assets-template
 spec:
-  serviceAccountName: argo-workflow
+  serviceAccountName: argo
   templates:
     - name: copy-task
       container:
@@ -11,13 +11,18 @@ spec:
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
-              name: minio-secret-credentials
+              name: copy-stac-asset-minio-secret
               key: access_key_id
         - name: AWS_SECRET_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: minio-secret-credentials
+              name: copy-stac-asset-minio-secret
               key: secret_access_key
+        - name: AWS_DEFAULT_REGION
+          valueFrom:
+            secretKeyRef:
+              name: copy-stac-asset-minio-secret
+              key: region
         image: quay.io/element84/copy-assets-stac-task:latest
         imagePullPolicy: IfNotPresent
         command: ["python3", "./task.py", "run"]

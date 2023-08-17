@@ -8,7 +8,7 @@ spec:
   arguments:
     parameters:
     - name: input
-      value: https://payloadtest.s3.us-west-2.amazonaws.com/payload_workflow.json
+      value: http://<REPLACE_WITH_MINIO_HOST>:<REPLACE_WITH_MINIO_PORT>/payloadtest/payload_workflow.json
 
   templates:
   - name: copy-assets

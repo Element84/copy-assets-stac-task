@@ -141,7 +141,7 @@
     "process": {
         "workflow": "copy-assets",
         "upload_options": {
-        "path_template": "s3://payloadtest/data/${collection}/${id}/",
+        "path_template": "s3://<REPLACE_WITH_ASSETS_S3_BUCKET_NAME>/data/${collection}/${id}/",
         "public_assets": [],
         "s3_urls": false
         },
