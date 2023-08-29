@@ -18,7 +18,7 @@ class CopyAssets(Task):
 
     @classmethod
     def validate(cls, payload: dict[str, Any]) -> bool:
-        if "assets" not in payload["process"][0]["tasks"][cls.name]:
+        if "assets" not in payload["process"][0]['tasks'][0][cls.name]:
             raise InvalidInput("assets that need to be copied required to be specified")
         return True
 
@@ -36,8 +36,8 @@ class CopyAssets(Task):
             item_dict = item.to_dict()
 
             # configuration options
-            process_payload = payload['process'][0]
-            config = process_payload.get('tasks', {}).get('copy-assets', {})
+            process_payload = payload['process'][0]['tasks'][0]
+            config = process_payload.get('copy-assets', {})
 
             assets = config.get('assets', item_dict['assets'].keys())
             drop_assets = config.get('drop_assets', [])
