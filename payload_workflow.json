@@ -1,8 +1,7 @@
 {
-    "id": "test",
     "type": "FeatureCollection",
-    "features": [
-    {
+    "id": "test",
+    "features": [{
         "id": "tx_m_2609719_se_14_060_20201217",
         "bbox": [
             -97.690252,
@@ -11,8 +10,7 @@
             26.689923
         ],
         "type": "Feature",
-        "links": [
-            {
+        "links": [{
                 "rel": "collection",
                 "type": "application/json",
                 "href": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip"
@@ -47,24 +45,23 @@
                     "data"
                 ],
                 "title": "RGBIR COG tile",
-                "eo:bands": [
-                {
-                    "name": "Red",
-                    "common_name": "red"
-                },
-                {
-                    "name": "Green",
-                    "common_name": "green"
-                },
-                {
-                    "name": "Blue",
-                    "common_name": "blue"
-                },
-                {
-                    "name": "NIR",
-                    "common_name": "nir",
-                    "description": "near-infrared"
-                }
+                "eo:bands": [{
+                        "name": "Red",
+                        "common_name": "red"
+                    },
+                    {
+                        "name": "Green",
+                        "common_name": "green"
+                    },
+                    {
+                        "name": "Blue",
+                        "common_name": "blue"
+                    },
+                    {
+                        "name": "NIR",
+                        "common_name": "nir",
+                        "description": "near-infrared"
+                    }
                 ]
             },
             "thumbnail": {
@@ -81,30 +78,31 @@
             "coordinates": [
                 [
                     [
-                    -97.623004,
-                    26.622563
+                        -97.623004,
+                        26.622563
                     ],
                     [
-                    -97.622203,
-                    26.689286
+                        -97.622203,
+                        26.689286
                     ],
                     [
-                    -97.68949,
-                    26.689923
+                        -97.68949,
+                        26.689923
                     ],
                     [
-                    -97.690252,
-                    26.623198
+                        -97.690252,
+                        26.623198
                     ],
                     [
-                    -97.623004,
-                    26.622563
+                        -97.623004,
+                        26.622563
                     ]
                 ]
             ]
         },
         "collection": "naip",
         "properties": {
+            "version": 2,
             "gsd": 0.6,
             "datetime": "2020-12-17T00:00:00Z",
             "naip:year": "2020",
@@ -138,18 +136,23 @@
         ],
         "stac_version": "1.0.0"
     }],
-    "process": {
+    "process": [{
+        "description": "string",
         "workflow": "copy-assets",
         "upload_options": {
-        "path_template": "s3://<REPLACE_WITH_ASSETS_S3_BUCKET_NAME>/data/${collection}/${id}/",
-        "public_assets": [],
-        "s3_urls": false
+            "path_template": "s3://<REPLACE_WITH_ASSETS_S3_BUCKET_NAME>/data/${collection}/${id}/",
+            "collections": {
+                "naip": "*"
+            },
+            "public_assets": [],
+            "headers": {},
+            "s3_urls": false
         },
         "tasks": {
-        "copy-assets": {
-            "assets": ["thumbnail"],
-            "drop_assets": ["image"]
+            "copy-assets": {
+                "assets": ["thumbnail"],
+                "drop_assets": ["image"]
+            }
         }
-        }
-    }
+    }]
 }

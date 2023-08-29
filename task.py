@@ -18,7 +18,9 @@ class CopyAssets(Task):
 
     @classmethod
     def validate(cls, payload: dict[str, Any]) -> bool:
-        payload["process"] = payload["process"][0]
+        payload["process"] = (
+            payload["process"][0] if isinstance(payload["process"], list) else payload["process"]
+        )
         if "assets" not in payload["process"]["tasks"][cls.name]:
             raise InvalidInput("assets that need to be copied required to be specified")
         return True
@@ -26,12 +28,10 @@ class CopyAssets(Task):
     def process(
         self, assets: List[str], drop_assets: List[str]
     ) -> List[Dict[str, Any]]:
-        print(self._payload)
         # process method overrides Task
         created_items = []
 
         payload = self._payload
-        print(payload)
 
         try:
             item = self.items[0]
@@ -85,7 +85,6 @@ class CopyAssets(Task):
             )
 
 def handler(event: dict[str, Any], context: dict[str, Any] = {}) -> Task:
-    print(event)
     return CopyAssets.handler(event)
 
 
