@@ -13,7 +13,7 @@ s3_client = s3(requester_pays=False)
 class CopyAssets(Task):
     name = 'copy-assets'
     description = 'STAC Task to copy STAC Item Assets to S3 and return an updated Item'
-    version = '0.2.0'
+    version = '0.0.8'
     task_options_schema = {
         '$schema': Draft202012Validator.META_SCHEMA['$id'],
 
