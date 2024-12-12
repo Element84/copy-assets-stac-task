@@ -10,36 +10,45 @@ from src.task import handler as copy_assets_handler
 TEST_DIR = Path(__file__).parent
 FIXTURE_DIR = TEST_DIR.joinpath("fixtures")
 BASE_PAYLOAD_FPATH = FIXTURE_DIR / "base_payload.json"
-ITEMS_DIR = FIXTURE_DIR.joinpath("items")
+ASSETS_DIR = FIXTURE_DIR.joinpath("assets")
 
 OLD_ASSET_BASE_HREF = "https://naipeuwest.blob.core.windows.net/naip/v002/tx/2020/tx_060cm_2020/26097/"
 NEW_ASSET_BASE_HREF = "s3://earthsearch-data/naip/tx_m_2609719_se_14_060_20201217/"
+
+
+def make_payload(assets_json_fpath):
+    with open(BASE_PAYLOAD_FPATH, 'r') as f:
+        payload = json.load(f)
+    with open(assets_json_fpath, 'r') as f:
+        assets = json.load(f)
+    payload['features'][0]['assets'] = assets
+    return payload
 
 TEST_DATA = [
     (
         # test assets="all" behavior
         {"assets": "all"},
-        ITEMS_DIR / "expected_item_copy_image_copy_thumbnail.json"
+        make_payload(ASSETS_DIR / "copy_image_copy_thumbnail.json")
     ),
     (
         # test assets copy/nocopy behavior
         {"assets": ["image"]},
-        ITEMS_DIR / "expected_item_copy_image_nocopy_thumbnail.json"
+        make_payload(ASSETS_DIR / "copy_image_nocopy_thumbnail.json")
     ),
     (
         # test drop_assets applied before assets="all"
         {"assets": "all", "drop_assets": ["image"]},
-        ITEMS_DIR / "expected_item_drop_image_copy_thumbnail.json"
+        make_payload(ASSETS_DIR / "drop_image_copy_thumbnail.json")
     ),
     (
         # test drop_assets drops everything
         {"assets": "all", "drop_assets": ["image", "thumbnail"]},
-        ITEMS_DIR / "expected_item_drop_image_drop_thumbnail.json"
+        make_payload(ASSETS_DIR / "drop_image_drop_thumbnail.json")
     ),
     (
         # test assets and drop_assets both ignore invalid keys
         {"assets": ["invalid-key"], "drop_assets": ["another-invalid-key"]},
-        ITEMS_DIR / "expected_item_nocopy_image_nocopy_thumbnail.json"
+        make_payload(ASSETS_DIR / "nocopy_image_nocopy_thumbnail.json")
     ),
 ]
 
@@ -77,12 +86,9 @@ def _mock_task_upload_item_assets_to_s3(monkeypatch) -> None:
     )
 
 
-@pytest.mark.parametrize("task_params,fpath_to_expected_output_as_json", TEST_DATA)
-def test_copy_assets(base_payload, task_params, fpath_to_expected_output_as_json):
-    with open(fpath_to_expected_output_as_json, 'r') as f:
-        expected = json.load(f)
-
+@pytest.mark.parametrize("task_params,expected_payload", TEST_DATA)
+def test_copy_assets(base_payload, task_params, expected_payload):
+    expected_payload["process"][0]["tasks"]["copy-assets"] = task_params
     base_payload["process"][0]["tasks"]["copy-assets"] = task_params
-    actual = copy_assets_handler(base_payload, context={})
-
-    assert actual == expected
+    actual_payload = copy_assets_handler(base_payload, context={})
+    assert actual_payload == expected_payload
