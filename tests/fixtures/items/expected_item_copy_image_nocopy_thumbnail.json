@@ -11,35 +11,13 @@
         ],
         "type": "Feature",
         "links": [{
-                "rel": "collection",
-                "type": "application/json",
-                "href": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip"
-            },
-            {
-                "rel": "parent",
-                "type": "application/json",
-                "href": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip"
-            },
-            {
-                "rel": "root",
-                "type": "application/json",
-                "href": "https://planetarycomputer.microsoft.com/api/stac/v1/"
-            },
-            {
-                "rel": "self",
-                "type": "application/geo+json",
-                "href": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip/items/tx_m_2609719_se_14_060_20201217"
-            },
-            {
-                "rel": "preview",
-                "href": "https://planetarycomputer.microsoft.com/api/data/v1/item/map?collection=naip&item=tx_m_2609719_se_14_060_20201217",
-                "title": "Map of item",
-                "type": "text/html"
-            }
-        ],
+            "rel": "collection",
+            "type": "application/json",
+            "href": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/naip"
+        }],
         "assets": {
             "image": {
-                "href": "https://naipeuwest.blob.core.windows.net/naip/v002/tx/2020/tx_060cm_2020/26097/m_2609719_se_14_060_20201217.tif",
+                "href": "s3://earthsearch-data/naip/tx_m_2609719_se_14_060_20201217/m_2609719_se_14_060_20201217.tif",
                 "type": "image/tiff; application=geotiff; profile=cloud-optimized",
                 "roles": [
                     "data"
@@ -140,7 +118,7 @@
         "description": "string",
         "workflow": "copy-assets",
         "upload_options": {
-            "path_template": "s3://<REPLACE_WITH_ASSETS_S3_BUCKET_NAME>/data/${collection}/${id}/",
+            "path_template": "s3://earthsearch-data/${collection}/${id}/",
             "collections": {
                 "naip": "*"
             },
@@ -150,8 +128,7 @@
         },
         "tasks": {
             "copy-assets": {
-                "assets": ["thumbnail"],
-                "drop_assets": ["image"]
+                "assets": ["image"]
             }
         }
     }]

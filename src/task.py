@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 from jsonschema import Draft202012Validator, validate as jsonschema_validate
 from typing import Any, Dict, List
-from boto3utils import s3
 from pystac import Item
 from stac_validator import stac_validator
 from stactask import Task
 from stactask.exceptions import FailedValidation
-
-s3_client = s3(requester_pays=False)
 
 
 class CopyAssets(Task):
@@ -48,8 +45,26 @@ class CopyAssets(Task):
             raise FailedValidation(err)
 
     def process(
-        self, assets: List[str] | str, drop_assets: List[str] | None = None
+        self,
+        assets: List[str] | str,
+        drop_assets: List[str] | None = None
     ) -> List[Dict[str, Any]]:
+        """Copies a subset of an Item's Assets to S3 and returns an updated Item.
+
+        Assets specified by 'drop_assets' are removed from the item first.
+        Assets specified by 'assets' are copied to S3 and added to the new item.
+        Any non-dropped/non-copied assets are persisted to the new item with old hrefs.
+
+        Args:
+            assets (list[str] | str): List of assets to copy to S3. Can be 'all' to
+                                      specify all assets.
+            drop_assets (list[str]): Optional. List of assets that will NOT be copied
+                                     and NOT persisted to the new Item.
+
+        Returns:
+            list[dict]: List containing the single STAC Item dict that contains the
+                        updated assets.
+        """
         try:
             item_old_dict = self.items[0].to_dict()
             keep_assets = list(item_old_dict['assets'].keys())
@@ -105,7 +120,8 @@ class CopyAssets(Task):
         stac = stac_validator.StacValidate()
         if not stac.validate_dict(item_new_dict):
             raise Exception(
-                f'STAC Item validation failed. Error: {stac.message[0]['error_message']}.'
+                f'STAC Item validation failed. '
+                f'Error: {stac.message[0]['error_message']}.'
             )
 
         return [item_new_dict]
