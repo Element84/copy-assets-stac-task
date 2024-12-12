@@ -1,0 +1,10 @@
+{
+    "thumbnail": {
+        "href": "s3://earthsearch-data/naip/tx_m_2609719_se_14_060_20201217/m_2609719_se_14_060_20201217.200.jpg",
+        "type": "image/jpeg",
+        "roles": [
+            "thumbnail"
+        ],
+        "title": "Thumbnail"
+    }
+}
