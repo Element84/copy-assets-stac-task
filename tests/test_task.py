@@ -61,7 +61,7 @@ def base_payload():
 
 @pytest.fixture(autouse=True)
 def _mock_task_download_item_assets(monkeypatch) -> None:
-    def mock_download(cls: CopyAssets, item: Item) -> Item:
+    def mock_download(cls: CopyAssets, item: Item, **kwargs) -> Item:
         return item
 
     monkeypatch.setattr(
@@ -72,12 +72,13 @@ def _mock_task_download_item_assets(monkeypatch) -> None:
 
 @pytest.fixture(autouse=True)
 def _mock_task_upload_item_assets_to_s3(monkeypatch) -> None:
-    def mock_upload(cls: CopyAssets, item: dict) -> Item:
-        for _, asset in item.assets.items():
-            asset.href = asset.href.replace(
-                OLD_ASSET_BASE_HREF,
-                NEW_ASSET_BASE_HREF
-            )
+    def mock_upload(cls: CopyAssets, item: dict, assets: list) -> Item:
+        for asset_key, asset in item.assets.items():
+            if asset_key in assets:
+                asset.href = asset.href.replace(
+                    OLD_ASSET_BASE_HREF,
+                    NEW_ASSET_BASE_HREF
+                )
         return item
 
     monkeypatch.setattr(
