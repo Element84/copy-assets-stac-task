@@ -3,7 +3,7 @@ from jsonschema import Draft202012Validator, validate as jsonschema_validate
 from typing import Any, Dict, List
 from pystac import Item
 from stac_validator import stac_validator
-from stactask import Task
+from stactask import Task, DownloadConfig
 from stactask.exceptions import FailedValidation
 
 
@@ -66,48 +66,30 @@ class CopyAssets(Task):
                         updated assets.
         """
         try:
-            item_old_dict = self.items[0].to_dict()
-            keep_assets = list(item_old_dict['assets'].keys())
+            item_new_dict = self.items[0].to_dict()
 
-            if drop_assets:
-                keep_assets = [a for a in keep_assets if a not in drop_assets]
+            for drop_asset in drop_assets or []:
+                item_new_dict['assets'].pop(drop_asset, None)
 
             if isinstance(assets, str) and assets.lower() == 'all':
-                # Copy everything that wasn't dropped
-                assets = keep_assets
+                # Copy all non-dropped assets
+                copy_assets = list(item_new_dict['assets'].keys())
+                nocopy_assets = []
+            else:
+                # Copy all (valid) non-dropped assets specified in the payload
+                copy_assets = [a for a in item_new_dict['assets'] if a in assets]
+                nocopy_assets = [a for a in item_new_dict['assets'] if a not in assets]
 
-            copy_assets = []
-            nocopy_assets = []
-            for a in keep_assets:
-                copy_assets.append(a) if a in assets else nocopy_assets.append(a)
-
-            item_new_dict = item_old_dict.copy()
-            item_new_dict['assets'] = dict()
-
-            if copy_assets:
-                # Create a new item with only the assets that will be copied.
-                # This is necessary as download_item_assets() doesn't allow selective
-                # asset downloading.
-                item_new_dict['assets'] = {
-                    k: v for k, v in item_old_dict['assets'].items()
-                    if k in copy_assets
-                }
-                item_new = Item.from_dict(item_new_dict)
-
-                # Download then upload.
-                # Downloading assets results in relative hrefs; they must be changed to
-                # absolute in order for the upload to find them.
-                item_new = self.download_item_assets(item_new)
-                item_new.make_asset_hrefs_absolute()
-                item_new = self.upload_item_assets_to_s3(item_new)
-                item_new_dict = item_new.to_dict()
-
-            if nocopy_assets:
-                # Add all non-copied assets into the new item
-                item_new_dict['assets'] |= {
-                    k: v for k, v in item_old_dict['assets'].items()
-                    if k in nocopy_assets
-                }
+            # Download then upload
+            item_new = Item.from_dict(item_new_dict)
+            item_new = self.download_item_assets(
+                item_new, config=DownloadConfig(exclude=nocopy_assets)
+            )
+            item_new.make_asset_hrefs_absolute()
+            item_new = self.upload_item_assets_to_s3(
+                item_new, assets=copy_assets
+            )
+            item_new_dict = item_new.to_dict()
 
             # Replace payload item
             self._payload['features'][0] = item_new_dict
